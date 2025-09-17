@@ -1,0 +1,12 @@
+apiVersion: v2
+name: ctfd
+description: A Helm chart for CTFd 
+type: application
+version: 0.1.0
+appVersion: "3.5.1"
+keywords:
+  - ctf
+  - lab
+home: https://github.com/CTFd/CTFd
+sources:
+  - https://github.com/CTFd/CTFd

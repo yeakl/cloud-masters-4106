@@ -1,0 +1,124 @@
+replicaCount: 2
+
+image:
+  repository: ctfd/ctfd
+  pullPolicy: IfNotPresent
+  tag: "3.5.1"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1001
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  hosts:
+    - host: ctfd.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 128m
+    memory: 256Mi
+  requests:
+    cpu: 64m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - ctfd
+        topologyKey: kubernetes.io/hostname
+
+nodeSelector: {}
+
+tolerations: []
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+priorityClass:
+  enabled: true
+  name: "ctfd-priority"
+  value: 1000
+  globalDefault: false
+  description: "Priority class for CTFd application"
+
+persistence:
+  enabled: true
+  storageClass: "nfs-storage"
+  accessMode: ReadWriteMany
+  size: 1Gi
+  uploads:
+    enabled: true
+    size: 500Mi
+    mountPath: /opt/CTFd/CTFd/uploads
+  logs:
+    enabled: true
+    size: 500Mi
+    mountPath: /opt/CTFd/logs
+
+nfs:
+  enabled: true
+  server: 10.1.0.17
+  path: /data/nfs
+  storageClassName: "nfs-storage"
