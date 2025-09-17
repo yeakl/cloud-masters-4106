@@ -1,0 +1,57 @@
+architecture: replication
+replication:
+  enabled: true
+
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "100m"
+
+secondary:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "100m"
+
+galera:
+  enabled: true
+  bootstrap:
+    forceSafeToBootstrap: true
+  sstMethod: "mariabackup"
+
+service:
+  type: ClusterIP
+  primary:
+    annotations: {}
+  secondary:
+    annotations: {}
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  periodSeconds: 20
+  timeoutSeconds: 10
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
