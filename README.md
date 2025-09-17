@@ -25,7 +25,7 @@ terraform.tfvars, в котором указаны значения переме
 ![alt text](files/image-3.png)
 
 Кластер в lens:
-![alt text](image-4.png)
+![alt text](files/image-4.png)
 
 Шаг 2. (Блок 2) Установка ingress
 ```shell
